@@ -33,14 +33,14 @@ pub mod zero_copy {
 
         // So the solution is use copy_from_slice and mem copy when we want to access data in the big account
         ctx.accounts.data_holder
-            .load_mut()?
+            .load_mut()? //najwazniejsze
             .long_string[index as usize..(index + 912) as usize].copy_from_slice(
                 string_to_set.as_bytes()
             );
 
         Ok(())
     }
-
+//w momencie ktorym najpierw zaalokowalismy to konto i chcemy podniesc 
     pub fn increase_account_data_zero_copy(
         _ctx: Context<IncreaseZeroCopy>,
         _len: u16
@@ -98,7 +98,7 @@ pub struct InitializeNoZeroCopy<'info> {
 #[derive(Accounts)]
 pub struct SetData<'info> {
     #[account(mut)]
-    pub data_holder: AccountLoader<'info, DataHolder>,
+    pub data_holder: AccountLoader<'info, DataHolder>, //dataholder alokuje pamiec dla 40kb
     #[account(mut)]
     pub signer: Signer<'info>,
 }
@@ -114,8 +114,9 @@ pub struct DataHolder {
 #[instruction(len: u16)]
 pub struct IncreaseZeroCopy<'info> {
     #[account(mut, 
-        realloc = len as usize, 
-        realloc::zero = true, 
+        realloc = len as usize,  //makro pozwalajace na dodanie pamieci do konta ktore
+        //jest juz przechowywane
+        realloc::zero = true, //nowa pamiec ktora zosstanie zaalokowana zostanie wypelniona zerami
         realloc::payer=signer)]
     pub data_holder: AccountLoader<'info, DataHolder>,
     #[account(mut)]
